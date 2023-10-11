@@ -50,7 +50,7 @@
 		var dracoLoader = new THREE.DRACOLoader(); // 创建一个新的 DRACOLoader
 		dracoLoader.setDecoderPath('./gltf/'); // 设置 Draco 解码器文件的路径
 		loader.setDRACOLoader(dracoLoader); // 将 DRACOLoader 设置为 GLTFLoader 的 DRACOLoader
-        loader.load('./ceshi1010.glb', function(gltf) { // 更改文件名字格式是./%Name ，保证在同一文件夹下即可调用，解决同源问题后可以调用网络资源
+        loader.load('./demo.glb', function(gltf) { // 更改文件名字格式是./%Name ，保证在同一文件夹下即可调用，解决同源问题后可以调用网络资源
           // 添加 gltf 场景
           scene.add(gltf.scene);
           
