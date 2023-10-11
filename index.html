@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>展示 glb 模型</title>
+    <style>
+      body { margin: 0; }
+      #container { width: 100%; height: 100vh; overflow: hidden; }
+    </style>
+  </head>
+  <body>
+    <div id="container"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+	<script src="https://cdn.rawgit.com/mrdoob/three.js/r134/examples/js/loaders/GLTFLoader.js"></script>
+	<script src="https://cdn.rawgit.com/mrdoob/three.js/r134/examples/js/controls/OrbitControls.js"></script>
+	<script src="https://cdn.rawgit.com/mrdoob/three.js/r134/examples/js/loaders/DRACOLoader.js"></script>
+    <script>
+      var renderer, scene, camera, controls;
+
+      init();
+      animate();
+
+      function init() {
+        // 创建场景、相机和渲染器
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xf0f0f0);
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('container').appendChild(renderer.domElement);
+
+        // 添加光源
+        var ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
+        var directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
+        directionalLight.position.set(-1, 1, 1);
+        scene.add(directionalLight);
+
+        // 添加默认地板
+        var floorGeometry = new THREE.PlaneGeometry(10, 10);
+        var floorMaterial = new THREE.MeshBasicMaterial({ color: 0x808080, side: THREE.DoubleSide });
+        var floor = new THREE.Mesh(floorGeometry, floorMaterial);
+        floor.rotation.x = -Math.PI / 2;
+        scene.add(floor);
+
+        // 加载 glb 文件
+        var loader = new THREE.GLTFLoader(); // 创建一个新的GLTF文件读取器
+		var dracoLoader = new THREE.DRACOLoader(); // 创建一个新的 DRACOLoader
+		dracoLoader.setDecoderPath('./gltf/'); // 设置 Draco 解码器文件的路径
+		loader.setDRACOLoader(dracoLoader); // 将 DRACOLoader 设置为 GLTFLoader 的 DRACOLoader
+        loader.load('./ceshi1010.glb', function(gltf) { // 更改文件名字格式是./%Name ，保证在同一文件夹下即可调用，解决同源问题后可以调用网络资源
+          // 添加 gltf 场景
+          scene.add(gltf.scene);
+          
+          // 创建动画混合器
+          var mixer = new THREE.AnimationMixer(gltf.scene);
+
+          // 播放动画
+          var action = mixer.clipAction(gltf.animations[0]);
+          action.play();
+		  action.setEffectiveTimeScale(2.25); // 加快动画速度
+
+          // 更新动画
+          function update() {
+            mixer.update(0.01);
+            requestAnimationFrame(update);
+          }
+          update();
+        }, undefined, function(error) {
+          console.error(error);
+        });
+
+        // 设置相机初始位置
+        camera.position.set(0, 0, 5);
+
+        // 添加控制器
+        controls = new THREE.OrbitControls(camera, renderer.domElement);
+
+        // 更新渲染器尺寸和相机纵横比
+        window.addEventListener('resize', function() {
+          var width = window.innerWidth;
+          var height = window.innerHeight;
+          renderer.setSize(width, height);
+          camera.aspect = width / height;
+          camera.updateProjectionMatrix();
+        }, false);
+      }
+
+      function animate() {
+        requestAnimationFrame(animate);
+        controls.update(); // 更新控制器状态
+        renderer.render(scene, camera);
+      }
+
+    </script>
+  </body>
+</html>
